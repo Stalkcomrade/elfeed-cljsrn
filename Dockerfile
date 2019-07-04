@@ -1,4 +1,4 @@
-FROM clojure:onbuild
+FROM clojure
 
 WORKDIR /tmp
 
@@ -67,6 +67,11 @@ ENV GRADLE_USER_HOME /usr/src/app/android/gradle_deps
 
 RUN update-ca-certificates -f
 
+
+COPY project.clj /usr/src/app/
+
 WORKDIR /usr/src/app
+
+RUN lein deps
 
 # CMD ["lein", "run"]
