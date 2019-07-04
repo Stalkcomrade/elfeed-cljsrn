@@ -21,75 +21,52 @@ RUN dpkg --add-architecture i386 && \
     apt-get update -q && \
     apt-get install -qy --no-install-recommends libstdc++6:i386 libgcc1:i386 zlib1g:i386 libncurses5:i386
 
-##
-## Install Android SDK
-##
-# Set correct environment variables.
-ENV ANDROID_SDK_FILE android-sdk_r24.0.1-linux.tgz
-ENV ANDROID_SDK_URL http://dl.google.com/android/$ANDROID_SDK_FILE
 
-# # Install Android SDK
+RUN mkdir -p /usr/local/android-sdk-linux && \
+    wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -O tools.zip && \
+    unzip tools.zip -d /usr/local/android-sdk-linux && \
+    rm tools.zip
+
+# Set environment variable
 ENV ANDROID_HOME /usr/local/android-sdk-linux
-RUN cd /usr/local && \
-    wget $ANDROID_SDK_URL && \
-    tar -xzf $ANDROID_SDK_FILE && \
-    export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools && \
-    chgrp -R users $ANDROID_HOME && \
-    chmod -R 0775 $ANDROID_HOME && \
-    rm $ANDROID_SDK_FILE
+ENV PATH ${ANDROID_HOME}/tools:$ANDROID_HOME/platform-tools:$PATH
 
-ENV PATH $PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/23.0.1
+# Make license agreement
+RUN mkdir $ANDROID_HOME/licenses && \
+    echo 8933bad161af4178b1185d1a37fbf41ea5269c55 > $ANDROID_HOME/licenses/android-sdk-license && \
+    echo d56f5187479451eabf01fb78af6dfcb131a6481e >> $ANDROID_HOME/licenses/android-sdk-license && \
+    echo 24333f8a63b6825ea9c5514f83c2829b004d1fee >> $ANDROID_HOME/licenses/android-sdk-license && \
+    echo 84831b9409646a918e30573bab4c9c91346d8abd > $ANDROID_HOME/licenses/android-sdk-preview-license
 
-# --- Install Android SDKs and other build packages
 
-# Other tools and resources of Android SDK
-#  you should only install the packages you need!
-# To get a full list of available options you can use:
-#  android list sdk --no-ui --all --extended
-# (!!!) Only install one package at a time, as "echo y" will only work for one license!
-#       If you don't do it this way you might get "Unknown response" in the logs,
-#         but the android SDK tool **won't** fail, it'll just **NOT** install the package.
-RUN echo y | android update sdk --no-ui --all --filter platform-tools
-RUN echo y | android update sdk --no-ui --all --filter extra-android-support
+# Update and install using sdkmanager
+RUN $ANDROID_HOME/tools/bin/sdkmanager "tools" "platform-tools" && \
+    $ANDROID_HOME/tools/bin/sdkmanager "build-tools;28.0.3" && \
+    $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-24"
 
-# google apis
-# Please keep these in descending order!
-RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-23
+RUN $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-24;google_apis;x86_64" && \
+    $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-24;google_apis;armeabi-v7a"
 
-# SDKs
-# Please keep these in descending order!
-RUN echo y | android update sdk --no-ui --all --filter android-23
+RUN $ANDROID_HOME/tools/bin/sdkmanager "extras;android;m2repository" 
 
-# build tools
-# Please keep these in descending order!
-RUN echo y | android update sdk --no-ui --all --filter build-tools-23.0.1
 
-# Android System Images, for emulators
-# Please keep these in descending order!
-RUN echo y | android update sdk --no-ui --all --filter sys-img-x86_64-android-23
-RUN echo y | android update sdk --no-ui --all --filter sys-img-armeabi-v7a-android-23
-# Extras
-RUN echo y | android update sdk --no-ui --all --filter extra-android-m2repository
-RUN echo y | android update sdk --no-ui --all --filter extra-google-m2repository
-RUN echo y | android update sdk --no-ui --all --filter extra-google-google_play_services
-
-RUN echo y | android update sdk --no-ui --all --filter tools
-
-# Create emulator
-RUN echo "no" | android create avd \
+RUN echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd \
                 --force \
                 --name test \
-                --target android-23 \
+                --package "system-images;android-24;google_apis;armeabi-v7a" \
                 --abi armeabi-v7a \
-                --skin WVGA800 \
                 --sdcard 512M
 
-# Support Gradle
+
+
+# # Support Gradle
 ENV TERM dumb
 ENV JAVA_OPTS -Xms256m -Xmx512m
 
 ENV GRADLE_USER_HOME /usr/src/app/android/gradle_deps
 
+RUN update-ca-certificates -f
+
 WORKDIR /usr/src/app
 
-CMD ["lein", "run"]
+# CMD ["lein", "run"]

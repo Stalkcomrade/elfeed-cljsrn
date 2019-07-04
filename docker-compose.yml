@@ -6,22 +6,23 @@ repl:
   volumes:
     - ~/.m2:/root/.m2
     - .:/usr/src/app
-    - ~/.lein/profiles.clj:/root/.lein/profiles.clj
-  command: lein repl :headless :host 0.0.0.0 :port 7888
+  # - ~/.lein/profiles.clj:/root/.lein/profiles.clj
+  # command: lein run
+  # command: lein repl :headless :host 0.0.0.0 :port 7888
   # links:
-  #   - reactnative
+    # - reactnative
 
-reactnative:
-  build: .
-  ports:
-    - "8081:8081"
-  volumes:
-    # - ~/.m2:/root/.m2
-    - .:/usr/src/app
-    # - /dev/bus/usb:/dev/bus/usb
-    - ~/.gradle:/usr/src/app/android/gradle_deps
-    - ~/.android:/root/.android
-  command: react-native start
-  # privileged: true
-  environment:
-    TERM: dumb
+# reactnative:
+#   build: .
+#   ports:
+#     - "8081:8081"
+#   volumes:
+#     # - ~/.m2:/root/.m2
+#     - .:/usr/src/app
+#     # - /dev/bus/usb:/dev/bus/usb
+#     - ~/.gradle:/usr/src/app/android/gradle_deps
+#     - ~/.android:/root/.android
+#   # command: react-native start
+#   # privileged: true
+#   environment:
+#     TERM: dumb
