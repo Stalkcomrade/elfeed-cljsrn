@@ -74,4 +74,6 @@ WORKDIR /usr/src/app
 
 RUN lein deps
 
-# CMD ["lein", "run"]
+# CMD ["lein repl :headless :host 0.0.0.0 :port 7888"]
+# CMD ["tail" "-f" "/dev/null"]
+## CMD ["lein", "run"]
