@@ -3,7 +3,8 @@
   :url "http://github.com/areina/elfeed-cljsrn"
   :license {:name "Apache License Version 2.0"
             :url  "http://www.apache.org/licenses/LICENSE-2.0.html"}
-  :dependencies [[org.clojure/clojure "1.9.0-alpha11"]
+  ; :dependencies [[org.clojure/clojure "1.9.0-alpha11"]
+  :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.9.293"]
                  [reagent "0.6.0" :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]]
                  [re-frame "0.9.1"]
