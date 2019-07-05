@@ -10,12 +10,6 @@ RUN wget --quiet https://github.com/facebook/watchman/archive/v$WATCHMAN_VERSION
     && tar -C /tmp/ -zxf watchman-v$WATCHMAN_VERSION.tar.gz \
     && cd /tmp/watchman-4.5.0/ && ./autogen.sh && ./configure && make && make install
 
-ENV PATH $PATH:node_modules/.bin
-
-RUN wget -qO- https://deb.nodesource.com/setup_4.x | bash -
-RUN apt-get install -y nodejs
-RUN npm install -g react-native-cli re-natal
-
 # Install 32bit support for Android SDK
 RUN dpkg --add-architecture i386 && \
     apt-get update -q && \
@@ -67,12 +61,25 @@ ENV GRADLE_USER_HOME /usr/src/app/android/gradle_deps
 
 RUN update-ca-certificates -f
 
+COPY project.clj .
+RUN lein deps 
 
-COPY project.clj /usr/src/app/
+
+FROM node:5
+# USER node
+ENV PATH $PATH:node_modules/.bin
+# RUN wget -qO- https://deb.nodesource.com/setup_4.x | bash -
+# RUN apt-get install -y nodejs
 
 WORKDIR /usr/src/app
 
-RUN lein deps
+COPY package*.json .
+RUN npm install -g react-native-cli re-natal
+RUN npm install && npm i invariant
+
+# COPY package.json .
+# RUN npm install \
+#     && npm i invariant
 
 # CMD ["lein repl :headless :host 0.0.0.0 :port 7888"]
 # CMD ["tail" "-f" "/dev/null"]
