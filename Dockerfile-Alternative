@@ -1,9 +1,11 @@
-FROM node:5
+FROM clojure:lein
 
+RUN wget -qO- https://deb.nodesource.com/setup_4.x | bash - \
+    && apt-get install -y nodejs
 ENV PATH $PATH:node_modules/.bin
-WORKDIR /usr/src/app
 
-# COPY . .
-
+WORKDIR /usr/src
 COPY package*.json .
-RUN npm i invariant
+
+RUN npm install -g react-native-cli re-natal
+RUN npm install && npm i invariant

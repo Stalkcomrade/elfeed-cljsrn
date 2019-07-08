@@ -22,7 +22,8 @@
   :profiles
   {:dev
    {:dependencies [[figwheel-sidecar "0.5.8"]
-                   [com.cemerick/piggieback "0.2.1"]]
+                    [cider/piggieback "0.4.1"]]
+                  ;;  [com.cemerick/piggieback "0.2.1"]]
     :plugins [[lein-figwheel "0.5.8"]]
     :source-paths ["src" "env/dev"]
     :cljsbuild    {:test-commands {"test" ["lein" "doo" "node" "test" "once"]}
@@ -49,7 +50,8 @@
                                         :target :nodejs
                                         :output-to "target/test/all-tests.js"
                                         :output-dir "target/test"}}]}
-    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
+    ; :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
+    :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}
    :prod {:cljsbuild {:builds [{:id "ios"
                                 :source-paths ["src" "env/prod"]
                                 :compiler     {:output-to     "index.ios.js"

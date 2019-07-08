@@ -1,4 +1,4 @@
-FROM clojure
+FROM clojure:lein
 
 WORKDIR /tmp
 
@@ -56,31 +56,38 @@ RUN echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd \
 # # Support Gradle
 ENV TERM dumb
 ENV JAVA_OPTS -Xms256m -Xmx512m
-
 ENV GRADLE_USER_HOME /usr/src/app/android/gradle_deps
 
 RUN update-ca-certificates -f
 
+RUN wget -qO- https://deb.nodesource.com/setup_8.x | bash - \
+    && apt-get install -y nodejs
+ENV PATH $PATH:node_modules/.bin
+
+WORKDIR /usr/src/app
+
 COPY project.clj .
 RUN lein deps 
 
-
-FROM node:5
-# USER node
-ENV PATH $PATH:node_modules/.bin
-# RUN wget -qO- https://deb.nodesource.com/setup_4.x | bash -
-# RUN apt-get install -y nodejs
-
-WORKDIR /usr/src/app
+RUN ls
 
 COPY package*.json .
 RUN npm install -g react-native-cli re-natal
 RUN npm install && npm i invariant
 
-# COPY package.json .
-# RUN npm install \
-#     && npm i invariant
+RUN apt-get install acl
 
-# CMD ["lein repl :headless :host 0.0.0.0 :port 7888"]
-# CMD ["tail" "-f" "/dev/null"]
-## CMD ["lein", "run"]
+RUN user=jenkins \
+    && uid=1000 \
+    && gid=1000 \
+    && group=shared \
+    && JENKINS_HOME=/usr/src/app \
+    && mkdir -p $JENKINS_HOME \
+    && groupadd -g ${gid} ${group} \
+    && useradd -u ${uid} -g ${group} ${user} \
+    && cd && mkdir /home/jenkins/ && chown -R ${user}:${group} /home \
+    && chown jenkins:shared /usr/local/bin/lein \
+    && setfacl -Rdm g:shared:rwx $JENKINS_HOME
+
+
+# CMD ["lein", "run"]
